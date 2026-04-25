@@ -1,0 +1,15 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Local files
+*.tfvars
+!*.tfvars.example
+
+# OS
+.DS_Store
+*.swp
+*.swo
+*~
