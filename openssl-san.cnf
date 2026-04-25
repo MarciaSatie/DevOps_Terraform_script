@@ -1,0 +1,20 @@
+[req]
+default_bits = 2048
+prompt = no
+default_md = sha256
+distinguished_name = dn
+x509_extensions = req_ext
+
+[dn]
+C = IE
+ST = Kilkenny
+L = Kilkenny
+O = SETU
+OU = DevOps Labs
+CN = assigment2.devops.local
+
+[req_ext]
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = assigment2.devops.local
