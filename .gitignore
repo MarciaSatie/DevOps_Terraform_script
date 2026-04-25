@@ -15,3 +15,5 @@ webserver.key
 *.swp
 *.swo
 *~
+webserver.csr
+webserver_self.crt
