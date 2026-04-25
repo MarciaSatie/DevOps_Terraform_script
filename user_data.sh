@@ -34,3 +34,25 @@ chmod +x /home/ec2-user/metrics.sh
 
 # 4. Set up the Cron Job to run every minute
 (crontab -l 2>/dev/null; echo "* * * * * /home/ec2-user/metrics.sh") | crontab -
+
+# *********************************************************************************
+# ------  Node JS (Extra) --------------------------------------
+#!/bin/bash
+# Install Node.js permanently on the Master Instance
+sudo yum install -y nodejs
+
+# Write the app file to the home directory
+cat << 'EOF' > /home/ec2-user/app.js
+const http = require('http');
+const os = require('os');
+const server = http.createServer((req, res) => {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/plain');
+  res.end(`Server Hostname: ${os.hostname()}\nNode.js is running from the Custom AMI!\n`);
+});
+server.listen(3000, '0.0.0.0');
+EOF
+
+# Ensure the app starts on every reboot (The "Assignment" way)
+echo "node /home/ec2-user/app.js &" >> /etc/rc.local
+chmod +x /etc/rc.local

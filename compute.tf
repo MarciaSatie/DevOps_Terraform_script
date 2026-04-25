@@ -39,19 +39,35 @@ resource "aws_instance" "web_server" {
   # This script runs on startup
   user_data = file("${path.module}/user_data.sh")
 
-  tags = { Name = "A2-DevOps-Web-Server" }
+  tags = { Name = "A2-Dev-Master-Instace" }
 
   iam_instance_profile = var.iam_profile_name
 }
 
+# 1. The Sleep Resource
+resource "time_sleep" "wait_for_node_install" { # Changed the name here
+  depends_on      = [aws_instance.web_server]
+  create_duration = "90s"
+}
 
+# 2. The AMI Resource
+resource "aws_ami_from_instance" "web_server_custom_ami" {
+  name                    = "A2-web-master-ami-${formatdate("YYYYMMDD-hhmmss", timestamp())}"
+  source_instance_id      = aws_instance.web_server.id
+  snapshot_without_reboot = true
+
+  # Now this matches the name above!
+  depends_on = [time_sleep.wait_for_node_install]
+}
 // ------ AMI -------------------------------------------------
 # AMI: Launch template for future reuse of this instance setup
 resource "aws_launch_template" "web_jt" {
   name_prefix   = "A2-web-template"
-  image_id      = var.web_server_ami
+  image_id      = aws_ami_from_instance.web_server_custom_ami.id
   instance_type = var.instance_type
-  user_data     = filebase64("${path.module}/user_data.sh")
+  user_data     = filebase64("${path.module}/asg_start.sh")
+
+  key_name = "devops02"
 
   network_interfaces {
     associate_public_ip_address = true
@@ -65,7 +81,7 @@ resource "aws_launch_template" "web_jt" {
   tag_specifications {
     resource_type = "instance"
     tags = {
-      Name = "A2-Web-Server"
+      Name = "A2-Auto-Scale-instance"
     }
   }
 }
@@ -107,44 +123,24 @@ resource "aws_autoscaling_policy" "scale_down" {
   autoscaling_group_name = aws_autoscaling_group.web_asg.name
 }
 
-// -------- Cloudwatch ----------------------------------------------------
-# The High-CPU Alarm (The "Trigger")
-#We have the "Action" (Scale Up), but we need the "Brain" to decide when to do it. 
-# We will use a CloudWatch Alarm to watch the average CPU usage of your servers. 
-# If it goes too high (e.g., above 70%), it "pulls the trigger" on the Scale-Up policy.
-resource "aws_cloudwatch_metric_alarm" "high_cpu" {
-  alarm_name          = "A2-High-CPU-Alarm"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
-  period              = "120"
-  statistic           = "Average"
-  threshold           = "70"
+# ------ The Database Instance-------------------------------------
+resource "aws_instance" "db_server" {
+  ami                    = var.web_server_ami
+  instance_type          = "t2.nano"
+  subnet_id              = aws_subnet.public_1.id
+  vpc_security_group_ids = [aws_security_group.db_sg.id]
 
-  dimensions = {
-    AutoScalingGroupName = aws_autoscaling_group.web_asg.name
-  }
+  key_name = "devops02"
 
-  alarm_actions = [aws_autoscaling_policy.scale_up.arn]
+  user_data = file("${path.module}/db_install.sh")
+
+  tags = { Name = "A2-Database-Server" }
 }
+# Database Add the AMI Resource
+resource "aws_ami_from_instance" "db_custom_ami" {
+  name               = "A2-database-master-ami-${formatdate("YYYYMMDD-hhmmss", timestamp())}"
+  source_instance_id = aws_instance.db_server.id
 
-// The Low-CPU Alarm (The "Cool Down")
-# This "Low-CPU" alarm watches for when your servers are bored (e.g., below 30% CPU). 
-# When that happens, it triggers the scale_down policy to remove a server.
-resource "aws_cloudwatch_metric_alarm" "low_cpu" {
-  alarm_name          = "A2-Low-CPU-Alarm"
-  comparison_operator = "LessThanThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
-  period              = "120"
-  statistic           = "Average"
-  threshold           = "30"
-
-  dimensions = {
-    AutoScalingGroupName = aws_autoscaling_group.web_asg.name
-  }
-
-  alarm_actions = [aws_autoscaling_policy.scale_down.arn]
+  # This tells Terraform: "Don't take the picture until the server is actually ready"
+  depends_on = [aws_instance.db_server]
 }
