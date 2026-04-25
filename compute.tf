@@ -5,13 +5,32 @@
 
   -EC2 and ASG
 */
+
+// ------ Variables -------------------------------------------------
+variable "web_server_ami" {
+  description = "AMI ID for web server instances"
+  type        = string
+  default     = "ami-0c101f26f147fa7fd"
+}
+
+variable "instance_type" {
+  description = "EC2 instance type"
+  type        = string
+  default     = "t2.nano"
+}
+
+variable "iam_profile_name" {
+  description = "LabInstanceProfile: IAM instance profile provided for this assigment."
+  type        = string
+  default     = "LabInstanceProfile"
+}
 // ------ EC2 -------------------------------------------------
 
 // Create EC2 Instance
 # this specific resource block aws_instance is what tells AWS to create a virtual server (EC2).
 resource "aws_instance" "web_server" {
-  ami                         = "ami-0c101f26f147fa7fd"
-  instance_type               = "t2.nano"
+  ami                         = var.web_server_ami
+  instance_type               = var.instance_type
   subnet_id                   = aws_subnet.public_1.id
   vpc_security_group_ids      = [aws_security_group.web_sg.id]
   associate_public_ip_address = true
@@ -21,12 +40,17 @@ resource "aws_instance" "web_server" {
   user_data = file("${path.module}/user_data.sh")
 
   tags = { Name = "A2-DevOps-Web-Server" }
+
+  iam_instance_profile = var.iam_profile_name
 }
+
+
+// ------ AMI -------------------------------------------------
 # AMI: Launch template for future reuse of this instance setup
 resource "aws_launch_template" "web_jt" {
   name_prefix   = "A2-web-template"
-  image_id      = "ami-0c101f26f147fa7fd"
-  instance_type = "t2.nano"
+  image_id      = var.web_server_ami
+  instance_type = var.instance_type
   user_data     = filebase64("${path.module}/user_data.sh")
 
   network_interfaces {
@@ -35,7 +59,7 @@ resource "aws_launch_template" "web_jt" {
   }
 
   iam_instance_profile {
-    name = data.aws_iam_instance_profile.lab_profile.name
+    name = var.iam_profile_name
   }
 
   tag_specifications {
