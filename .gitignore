@@ -3,6 +3,7 @@
 *.tfstate
 *.tfstate.*
 .terraform.lock.hcl
+devops02.pem
 
 # Local files
 *.tfvars
