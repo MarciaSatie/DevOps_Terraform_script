@@ -8,7 +8,6 @@ devops02.pem
 # Local files
 *.tfvars
 !*.tfvars.example
-webserver.key
 
 # OS
 .DS_Store
@@ -17,3 +16,4 @@ webserver.key
 *~
 webserver.csr
 webserver_self.crt
+webserver.key
