@@ -3,13 +3,17 @@
 *.tfstate
 *.tfstate.*
 .terraform.lock.hcl
+devops02.pem
 
 # Local files
 *.tfvars
 !*.tfvars.example
+webserver.key
 
 # OS
 .DS_Store
 *.swp
 *.swo
 *~
+webserver.csr
+webserver_self.crt
