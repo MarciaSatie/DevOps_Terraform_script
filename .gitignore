@@ -3,7 +3,7 @@
 *.tfstate
 *.tfstate.*
 .terraform.lock.hcl
-devops02.pem
+secrets/
 
 # Local files
 *.tfvars
@@ -14,6 +14,6 @@ devops02.pem
 *.swp
 *.swo
 *~
-webserver.csr
-webserver_self.crt
-webserver.key
+
+Assignment-2-review-template-grading - Rubric.pdf
+openssl-san.cnf

@@ -67,9 +67,9 @@ resource "aws_lb_listener" "https" {
 # This starts the definition of your certificate in AWS Certificate Manager (ACM)
 resource "aws_acm_certificate" "self_signed_cert" {
   # This tells Terraform to read the private key file you generated. The ${path.module} ensures it looks in the same folder as your code.
-  private_key = file("${path.module}/webserver.key")
+  private_key = file("${path.module}/../secrets/webserver.key")
   # This uploads the public part of the certificate that browsers will see.
-  certificate_body = file("${path.module}/webserver_self.crt")
+  certificate_body = file("${path.module}/../secrets/webserver_self.crt")
 
   # This is how you "create" the ACM entry using your own files.
   lifecycle {

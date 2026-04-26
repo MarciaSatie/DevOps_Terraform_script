@@ -72,7 +72,7 @@ These are the "GPS maps" that tell network traffic how to get to the Internet Ga
 - **Self-Healing**: If an instance dies, the ASG detects it and launches a replacement.
 
 ### Scaling Policies & CloudWatch Alarms
-- **High CPU Alarm**: If CPU > 70%, trigger the Scale-Up policy (+1 server).
+- **High CPU Alarm**: If CPU > 50%, trigger the Scale-Up policy (+1 server).
 - **Low CPU Alarm**: If CPU < 30%, trigger the Scale-Down policy (-1 server).
 - **Cooldown (300s)**: Prevents the system from adding/removing servers too quickly before the previous change has finished.
 

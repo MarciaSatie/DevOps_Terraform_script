@@ -37,7 +37,7 @@ resource "aws_instance" "web_server" {
 
   # use a "User Data" script to automatically install Apache (httpd) the moment the server starts.
   # This script runs on startup
-  user_data = file("${path.module}/user_data.sh")
+  user_data = file("${path.module}/../scripts/user_data.sh")
 
   tags = { Name = "A2-Dev-Master-Instace" }
 
@@ -65,7 +65,7 @@ resource "aws_launch_template" "web_jt" {
   name_prefix   = "A2-web-template"
   image_id      = aws_ami_from_instance.web_server_custom_ami.id
   instance_type = var.instance_type
-  user_data     = filebase64("${path.module}/asg_start.sh")
+  user_data     = filebase64("${path.module}/../scripts/asg_start.sh")
 
   key_name = "devops02"
 
@@ -92,8 +92,8 @@ resource "aws_launch_template" "web_jt" {
 resource "aws_autoscaling_group" "web_asg" {
   name                      = "A2-Web-ASG"
   desired_capacity          = 2 // This tells AWS to start with 2 servers immediately.
-  max_size                  = 4 // The absolute limit of servers we will pay for, even if traffic is huge.
-  min_size                  = 1
+  max_size                  = 6 // The absolute limit of servers we will pay for, even if traffic is huge.
+  min_size                  = 2
   health_check_type         = "ELB"
   health_check_grace_period = 300
   vpc_zone_identifier       = [aws_subnet.public_1.id, aws_subnet.public_2.id] // This tells the ASG which "neighborhoods" (subnets) it's allowed to build in.
@@ -132,7 +132,7 @@ resource "aws_instance" "db_server" {
 
   key_name = "devops02"
 
-  user_data = file("${path.module}/db_install.sh")
+  user_data = file("${path.module}/../scripts/db_install.sh")
 
   tags = { Name = "A2-Database-Server" }
 }
