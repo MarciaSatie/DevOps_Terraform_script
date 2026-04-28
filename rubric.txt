@@ -1,0 +1,145 @@
+Planning:
+Application selection and
+architecture planning,
+including architecture
+diagram. AMI creation.
+(Steps 1, 2)
+
+VPC and load balancer
+implementation.
+(Steps 3, 4)
+
+Auto-scaling
+implementation and
+demonstration of scaling
+activity based on
+CloudWatch alarm.
+(Steps 4, 5)
+
+Test traffic and load balancing
+demonstration.
+(Step 6)
+
+Monitoring:
+Own script.
+(Step 7)
+
+Additional functionality
+
+Clarity, layout and
+presentation, Demo
+
+Marks
+
+10
+
+10
+
+20
+
+10
+
+10
+
+20
+
+20
+
+Base (40-54)
+
+Launch template based on
+Relatively simple or default
+Working VPC with public subnets
+Manual demonstration of load
+custom AMI and dynamic
+web server config captured in in multiple AZs with load
+balancing using browser or just
+scaling based on CloudWatch
+AMI
+balancing
+diplay of logs
+alarm
+
+Basic script that tracks some
+OS or application-specific
+metric (e.g. memory
+utilisation)
+
+Demonstrate one
+additional function
+
+Acceptable documentation and
+presentation, readable report,
+appropriate references
+
+Good (55-69)
+
+Basic demonstration of load
+Demonstrate one
+Above + appropriately configured
+Above + based on well-judged balancing using test script or test
+Above + script configured on additional function which
+More sophisticated or custom target group + appropriate use of
+tool on client side and visualisation AMI with cron to run on auto- goes beyond basic
+and justified alarms for
+application
+security groups
+of load balancing effects on server scaled instances
+demonstration of
+scaling out and scaling in.
+side.
+functionality
+
+Excellent (70-84)
+
+Customised multi-tier
+application
+
+Above + more sophisticated
+security configuration (e.g. with
+Above + well tested scaling
+Bastion) or more sophisticated LB
+policies
+config or dealing with session
+management/ persistence
+
+Outstanding (85-100)
+
+All previous to exceptional
+level.
+
+All previous to exceptional level.
+
+All previous to exceptional
+level.
+
+Professional quality document
+and presentation; attention in
+report given to layout, headings,
+flow, clarity of expression,
+readability, clear graphics,
+appropriate references
+
+More sophisticated demonstration
+Above + more sophisticated
+of load balancing using custom
+monitoring script
+script or other tool or analysis
+
+Demonstrates
+sophisticated functionality
+
+High quality document and
+presentation
+
+All previous to exceptional
+level.
+
+All previous to exceptional
+level.
+
+All previous to exceptional level.
+
+All previous to exceptional level.
+
+
