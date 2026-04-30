@@ -1,6 +1,6 @@
 #!/bin/bash
 # This runs INSIDE the AWS EC2 instance, not on your laptop
-sudo yum install -y httpd sysstat net-tools cronie git nodejs
+sudo yum install -y httpd sysstat net-tools cronie git
 
 # 1. Start the web server
 sudo systemctl start httpd
@@ -74,11 +74,14 @@ const server = http.createServer(async (req, res) => {
 server.listen(3000, '0.0.0.0');
 EOF
 
+# Install Node.js 20 via NodeSource
+curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
+sudo yum install -y nodejs
 # Install Node deps for the app and start with pm2 as ec2-user
 cd /home/ec2-user || exit 0
 sudo -u ec2-user npm init -y
 sudo -u ec2-user npm install mongodb --no-audit --no-fund
-sudo npm install -g pm2
+sudo npm install -g pm2 # process manager for NodeJS, this what keeps app running, even after close the SSH
 sudo chown -R ec2-user:ec2-user /home/ec2-user
 sudo -u ec2-user pm2 start /home/ec2-user/app.js --name assigment02-app || sudo -u ec2-user pm2 start app.js --name assigment02-app
 sudo -u ec2-user pm2 save
