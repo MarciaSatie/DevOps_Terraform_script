@@ -43,40 +43,47 @@ chmod +x /home/ec2-user/metrics.sh
 cat << 'EOF' > /home/ec2-user/app.js
 const http = require('http');
 const os = require('os');
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end(`Server Hostname: ${os.hostname()}\nNode.js is running from the Custom AMI!\n`);
+const { MongoClient } = require('mongodb');
+
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017';
+const DB_NAME = 'assigment02';
+const COLLECTION = 'bootstrap';
+
+const client = new MongoClient(MONGO_URL);
+let cachedMessage = null;
+
+async function getDbMessage() {
+  if (cachedMessage) return cachedMessage;
+  try {
+    await client.connect();
+    const db = client.db(DB_NAME);
+    const doc = await db.collection(COLLECTION).findOne({ _id: 'welcome' });
+    cachedMessage = doc && doc.message ? doc.message : 'No message found in DB';
+    return cachedMessage;
+  } catch (err) {
+    return `DB error: ${err.message}`;
+  }
+}
+
+const server = http.createServer(async (req, res) => {
+  const msg = await getDbMessage();
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end(`Server Hostname: ${os.hostname()}\nDB message: ${msg}\n`);
 });
+
 server.listen(3000, '0.0.0.0');
 EOF
 
-# Clone and install museum_app as ec2-user
-if [ ! -d /home/ec2-user/museum_app ]; then
-  sudo -u ec2-user git clone https://github.com/MarciaSatie/museum_app.git /home/ec2-user/museum_app
-fi
-
-sudo -u ec2-user bash -lc 'cd /home/ec2-user/museum_app && npm install --omit=dev'
+# Install Node deps for the app and start with pm2 as ec2-user
+cd /home/ec2-user || exit 0
+sudo -u ec2-user npm init -y
+sudo -u ec2-user npm install mongodb --no-audit --no-fund
 sudo npm install -g pm2
+sudo chown -R ec2-user:ec2-user /home/ec2-user
+sudo -u ec2-user pm2 start /home/ec2-user/app.js --name assigment02-app || sudo -u ec2-user pm2 start app.js --name assigment02-app
+sudo -u ec2-user pm2 save
 
-# Create .env if missing. Replace the placeholders for production use.
-if [ ! -f /home/ec2-user/museum_app/.env ]; then
-cat << 'EOF' > /home/ec2-user/museum_app/.env
-PORT=3000
-NODE_ENV=production
-cookie_name=app_museum_cookie
-cookie_password=replace_with_long_secret_min_32_chars
-JWT_SECRET=replace_with_long_jwt_secret
-MONGO_URL=mongodb://10.0.1.227:27017/museum
-EOF
-fi
 
-# Start app with PM2. If env values are incomplete, fall back to simple app.js.
-sudo -u ec2-user bash -lc 'cd /home/ec2-user/museum_app && pm2 delete museum-app || true && pm2 start src/server.js --name museum-app && pm2 save' || node /home/ec2-user/app.js &
 
-# Ensure startup behavior after reboot.
-if ! grep -q "museum-app" /etc/rc.local; then
-  echo "sudo -u ec2-user pm2 resurrect || sudo -u ec2-user pm2 start /home/ec2-user/museum_app/src/server.js --name museum-app || node /home/ec2-user/app.js &" >> /etc/rc.local
-fi
-chmod +x /etc/rc.local
+
 
