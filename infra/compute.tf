@@ -65,7 +65,9 @@ resource "aws_launch_template" "web_jt" {
   name_prefix   = "A2-web-template"
   image_id      = aws_ami_from_instance.web_server_custom_ami.id
   instance_type = var.instance_type
-  user_data     = filebase64("${path.module}/../scripts/asg_start.sh")
+  user_data = base64encode(templatefile("${path.module}/../scripts/asg_start.sh", {
+    mongo_url = "mongodb://${aws_instance.db_server.private_ip}:27017"
+  }))
 
   key_name = "devops02"
 
@@ -91,9 +93,9 @@ resource "aws_launch_template" "web_jt" {
 # It ensures that if an instance crashes, a new one is born, and it places them across your two subnets for safety.
 resource "aws_autoscaling_group" "web_asg" {
   name                      = "A2-Web-ASG"
-  desired_capacity          = 2 // This tells AWS to start with 2 servers immediately.
+  desired_capacity          = 1 // This tells AWS to start with 2 servers immediately.
   max_size                  = 6 // The absolute limit of servers we will pay for, even if traffic is huge.
-  min_size                  = 2
+  min_size                  = 1
   health_check_type         = "ELB"
   health_check_grace_period = 300
   vpc_zone_identifier       = [aws_subnet.public_1.id, aws_subnet.public_2.id] // This tells the ASG which "neighborhoods" (subnets) it's allowed to build in.

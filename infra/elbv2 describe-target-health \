@@ -1,0 +1,76 @@
+{
+    "TargetHealthDescriptions": [
+        {
+            "Target": {
+                "Id": "i-03443b443c5d59dc3",
+                "Port": 3000
+            },
+            "HealthCheckPort": "3000",
+            "TargetHealth": {
+                "State": "unhealthy",
+                "Reason": "Target.FailedHealthChecks",
+                "Description": "Health checks failed"
+            },
+            "AdministrativeOverride": {
+                "State": "no_override",
+                "Reason": "AdministrativeOverride.NoOverride",
+                "Description": "No override is currently active on target"
+            }
+        },
+        {
+            "Target": {
+                "Id": "i-0abe8bf96f4bbef8e",
+                "Port": 3000
+            },
+            "HealthCheckPort": "3000",
+            "TargetHealth": {
+                "State": "draining",
+                "Reason": "Target.DeregistrationInProgress",
+                "Description": "Target deregistration is in progress"
+            },
+            "AdministrativeOverride": {
+                "State": "no_override",
+                "Reason": "AdministrativeOverride.NoOverride",
+                "Description": "No override is currently active on target"
+            }
+        }
+    ]
+}
+{
+    "TargetHealthDescriptions": [
+        {
+            "Target": {
+                "Id": "i-03443b443c5d59dc3",
+                "Port": 3000
+            },
+            "HealthCheckPort": "3000",
+            "TargetHealth": {
+                "State": "draining",
+                "Reason": "Target.DeregistrationInProgress",
+                "Description": "Target deregistration is in progress"
+            },
+            "AdministrativeOverride": {
+                "State": "no_override",
+                "Reason": "AdministrativeOverride.NoOverride",
+                "Description": "No override is currently active on target"
+            }
+        },
+        {
+            "Target": {
+                "Id": "i-0653c1592e20b87bf",
+                "Port": 3000
+            },
+            "HealthCheckPort": "3000",
+            "TargetHealth": {
+                "State": "initial",
+                "Reason": "Elb.RegistrationInProgress",
+                "Description": "Target registration is in progress"
+            },
+            "AdministrativeOverride": {
+                "State": "no_override",
+                "Reason": "AdministrativeOverride.NoOverride",
+                "Description": "No override is currently active on target"
+            }
+        }
+    ]
+}

@@ -63,11 +63,6 @@ resource "aws_security_group" "web_sg" {
   }
 }
 
-//data blocks are for reading existing info, while resource blocks are for building new things.
-data "aws_iam_instance_profile" "lab_profile" {
-  name = "LabInstanceProfile"
-}
-
 # The Database Security Group
 resource "aws_security_group" "db_sg" {
   name        = "A2-db-sg"

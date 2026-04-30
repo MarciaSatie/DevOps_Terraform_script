@@ -12,3 +12,8 @@ output "alb_dns_name" {
   description = "The DNS name of the load balancer"
   value       = aws_lb.main_alb.dns_name
 }
+
+output "db_private_ip" {
+  description = "Private IP of the MongoDB database server"
+  value       = aws_instance.db_server.private_ip
+}
