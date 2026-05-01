@@ -33,7 +33,7 @@ EOF
 # 3. Make the script executable
 chmod +x /home/ec2-user/metrics.sh
 
-# 4. Set up the Cron Job to run every minute
+# 4. Set up the Cron Job to run Monitory every few minutes
 (crontab -l 2>/dev/null; echo "* * * * * /home/ec2-user/metrics.sh >> /home/ec2-user/metrics.log 2>&1") | crontab -
 
 # *********************************************************************************
