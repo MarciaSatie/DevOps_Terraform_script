@@ -24,16 +24,31 @@ TCP_CONN=$(netstat -an | wc -l)
 TCP_CONN_PORT_80=$(netstat -an | grep 80 | wc -l)
 IO_WAIT=$(iostat | awk 'NR==4 {print $5}')
 
+ 1. CPU Load (1-minute average)
+CPU_LOAD=$(uptime | awk -F'load average:' '{ print $2 }' | cut -d, -f1 | xargs)
+
+# 2. Disk Usage (Percentage of the root partition)
+DISK_USAGE=$(df / | awk 'NR==2 {print $5}' | sed 's/%//')
+
+# 3. System Uptime (In seconds - much better for graphing than "3 days")
+UPTIME_SEC=$(cat /proc/uptime | awk '{print $1}')
+
+
 aws cloudwatch put-metric-data --metric-name memory-usage --dimensions Instance="$INSTANCE_ID" --namespace "Custom" --value "$USEDMEMORY" --region "$REGION"
 aws cloudwatch put-metric-data --metric-name Tcp_connections --dimensions Instance="$INSTANCE_ID" --namespace "Custom" --value "$TCP_CONN" --region "$REGION"
 aws cloudwatch put-metric-data --metric-name TCP_connection_on_port_80 --dimensions Instance="$INSTANCE_ID" --namespace "Custom" --value "$TCP_CONN_PORT_80" --region "$REGION"
 aws cloudwatch put-metric-data --metric-name IO_WAIT --dimensions Instance="$INSTANCE_ID" --namespace "Custom" --value "$IO_WAIT" --region "$REGION"
+# New Metrics
+aws cloudwatch put-metric-data --metric-name CPULoad --dimensions Instance="$INSTANCE_ID" --namespace "Custom" --value "$CPU_LOAD" --region "$REGION"
+aws cloudwatch put-metric-data --metric-name DiskUsagePercent --dimensions Instance="$INSTANCE_ID" --namespace "Custom" --value "$DISK_USAGE" --region "$REGION"
+aws cloudwatch put-metric-data --metric-name UptimeSeconds --dimensions Instance="$INSTANCE_ID" --namespace "Custom" --value "$UPTIME_SEC" --region "$REGION"
+
 EOF
 
 # 3. Make the script executable
 chmod +x /home/ec2-user/metrics.sh
 
-# 4. Set up the Cron Job to run every minute
+# 4. Set up the Cron Job to run Monitory every few minutes
 (crontab -l 2>/dev/null; echo "* * * * * /home/ec2-user/metrics.sh >> /home/ec2-user/metrics.log 2>&1") | crontab -
 
 # *********************************************************************************

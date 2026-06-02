@@ -77,13 +77,14 @@ resource "aws_security_group" "db_sg" {
     # THIS IS THE KEY LINE:
     security_groups = [aws_security_group.web_sg.id]
   }
-  # this is toallow to install MongoDB manually (SSH)
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  # this is to allow to install MongoDB manually (SSH)
+  # Disabled, so we have to use bastion to connect to SSH
+  # ingress {
+  #   from_port   = 22
+  #   to_port     = 22
+  #   protocol    = "tcp"
+  #   cidr_blocks = ["0.0.0.0/0"]
+  # }
 
   # allow the database to "talk back" to the world (to download updates, for example).
   egress {
@@ -93,3 +94,46 @@ resource "aws_security_group" "db_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+# This "calls" a website to find your current public IP automatically
+data "http" "my_public_ip" {
+  url = "https://ipv4.icanhazip.com"
+}
+
+# Bastion
+# This starts a new Security Group specific for the "Bridge" (Bastion)
+resource "aws_security_group" "bastion_sg" {
+  name        = "A2-bastion-sg"
+  description = "Allow SSH from my dynamic IP"
+  vpc_id      = aws_vpc.main_vpc.id
+
+  ingress {
+    from_port = 22
+    to_port   = 22
+    protocol  = "tcp"
+    # This allows any IP from 80.233.0.0 to 80.233.255.255
+    cidr_blocks = ["80.233.0.0/16"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# Allow Bastion to SSH into DB Server
+# This is the "Master Key" rule to fix the connection
+resource "aws_security_group_rule" "fix_db_access" {
+  type      = "ingress"
+  from_port = 22
+  to_port   = 22
+  protocol  = "tcp"
+  # This allows the WHOLE VPC to talk to the DB via SSH
+  #he Security Group IDs can get "stale" or mismatched. By using the VPC CIDR (10.0.0.0/16), 
+  #AWS allows any connection (VPC) from inside."
+  cidr_blocks       = ["10.0.0.0/16"]
+  security_group_id = aws_security_group.db_sg.id
+}
+#
