@@ -7,10 +7,10 @@
 resource "aws_cloudwatch_metric_alarm" "high_cpu" {
   alarm_name          = "A2-High-CPU-Alarm"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "2"
+  evaluation_periods  = "1"
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
-  period              = "120"
+  period              = "60"
   statistic           = "Average"
   threshold           = "70"
 
@@ -27,10 +27,10 @@ resource "aws_cloudwatch_metric_alarm" "high_cpu" {
 resource "aws_cloudwatch_metric_alarm" "low_cpu" {
   alarm_name          = "A2-Low-CPU-Alarm"
   comparison_operator = "LessThanThreshold"
-  evaluation_periods  = "2"
+  evaluation_periods  = "1"
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
-  period              = "120"
+  period              = "60"
   statistic           = "Average"
   threshold           = "30"
 

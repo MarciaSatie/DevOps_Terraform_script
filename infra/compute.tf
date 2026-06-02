@@ -93,9 +93,9 @@ resource "aws_launch_template" "web_jt" {
 # It ensures that if an instance crashes, a new one is born, and it places them across your two subnets for safety.
 resource "aws_autoscaling_group" "web_asg" {
   name                      = "A2-Web-ASG"
-  desired_capacity          = 1 // This tells AWS to start with 2 servers immediately.
-  max_size                  = 6 // The absolute limit of servers we will pay for, even if traffic is huge.
-  min_size                  = 1
+  desired_capacity          = 2 // This tells AWS to start with 2 servers immediately.
+  max_size                  = 8 // The absolute limit of servers we will pay for, even if traffic is huge.
+  min_size                  = 2
   health_check_type         = "ELB"
   health_check_grace_period = 300
   vpc_zone_identifier       = [aws_subnet.public_1.id, aws_subnet.public_2.id] // This tells the ASG which "neighborhoods" (subnets) it's allowed to build in.
@@ -128,7 +128,7 @@ resource "aws_autoscaling_policy" "scale_down" {
 # ------ The Database Instance-------------------------------------
 resource "aws_instance" "db_server" {
   ami                    = var.web_server_ami
-  instance_type          = "t2.nano"
+  instance_type          = var.instance_type
   subnet_id              = aws_subnet.public_1.id
   vpc_security_group_ids = [aws_security_group.db_sg.id]
 
@@ -143,6 +143,20 @@ resource "aws_ami_from_instance" "db_custom_ami" {
   name               = "A2-database-master-ami-${formatdate("YYYYMMDD-hhmmss", timestamp())}"
   source_instance_id = aws_instance.db_server.id
 
-  # This tells Terraform: "Don't take the picture until the server is actually ready"
+  snapshot_without_reboot = true
+
   depends_on = [aws_instance.db_server]
+}
+
+
+# Bastion instance
+resource "aws_instance" "bastion" {
+  ami                         = var.web_server_ami
+  instance_type               = var.instance_type
+  subnet_id                   = aws_subnet.public_1.id
+  vpc_security_group_ids      = [aws_security_group.bastion_sg.id]
+  key_name                    = "devops02"
+  associate_public_ip_address = true
+
+  tags = { Name = "A2-Bastion-Host" }
 }
